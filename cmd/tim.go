@@ -2,49 +2,63 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
-	"path"
-	"tim/pkgs/cli"
+	cli "github.com/danninx/tim/pkgs/cliparse"
+	actions "github.com/danninx/tim/internals/timactions"
 )
 
-const ANSI_RED = "\x1b[31m"
-const ANSI_GREEN = "\x1b[32m"
-const ANSI_WHITE = "\x1b[37m"
-const ANSI_RESET = "\x1b[0m"
-
-type Flag struct {
-	name 	string
-	value 	string
-}
-
-func ensureTimPath() {
-	dirname, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal( err )
-	}
-	timPath := path.Join(dirname, "/.config/tim")
-	err = os.MkdirAll(timPath, os.ModePerm)
-	if err != nil {
-		log.Fatal( err )
-	}
-}
-
-func timHelp() {
-	fmt.Printf("Implement tim help!")	
-}
-
-func checkGitUrl(url string) bool {
-	_, err := exec.Command("git", "ls-remote", url, "HEAD").CombinedOutput()
-	return err == nil
-}
 
 func main() {
 	arguments := os.Args
 	if len(arguments) == 1 {
-		timHelp()
+		actions.Help(cli.Command{})
 		os.Exit(0)
 	}
-	
+
+	flagPrefix := "-"
+	flags := map [string] string { 
+		"l": "local",
+		"-local": "local",
+		"f": "file",
+		"file": "file",
+		"d": "directory",
+		"dir": "directory",
+		"g": "git",
+		"git": "git",
+	}
+	silents := map [string] bool {
+		"l": true,
+		"-local": true,
+	}
+
+	cmd := cli.ParseArgs(
+		arguments,
+		flagPrefix,
+		flags,
+		silents,
+	)
+	fmt.Println(cli.CommandString(cmd))
+
+	subcommands := map [string] func(cli.Command) { 
+		"add": actions.Add,
+		"edit": actions.Edit,
+		"ls": actions.List,
+		"rm": actions.Remove,
+		"help": actions.Help,
+		"testwrite": actions.TestWrite,
+	}
+
+	if len(cmd.Options) == 0 {
+		actions.Help(cmd)
+		os.Exit(0)
+	}
+
+	commandAction := cmd.Options[0]
+	f, exists := subcommands[commandAction]
+	if exists {
+		f(cmd)
+	} else {
+		panic(fmt.Sprintf("tim - unrecognized action %v\n", commandAction))
+	}
 }
+
