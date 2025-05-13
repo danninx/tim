@@ -1,8 +1,14 @@
 package timactions;
 
-import ( "fmt"
+import ( 
+	"bufio"
+	"fmt"
 	"os"
+	"os/exec"
+	"path"
 	"slices"
+	"strings"
+
 	cli "github.com/danninx/tim/pkgs/cliparse"
 	timfile "github.com/danninx/tim/internals/timfile"
 )
@@ -17,24 +23,31 @@ const ANSI_YELLOW = "\x1b[33m"
 
 const GIT_WARNING = "\x1b[31mwarning: tim cannot verify the integrity of git urls, make sure you have the correct url and proper read access\x1b[0m"
 
+func confirmAction(msg string) bool {
+	fmt.Print(msg)
+	reader := bufio.NewReader(os.Stdin)	
+	response, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	response = strings.Replace(response, "\n", "", -1)
+	return response == "y" || response == "Y"
+}
+
 func Add(command cli.Command) {
 	stype, source := getSource(command)
 
 	if len(command.Options) < 2 {
 		fmt.Printf("tim - invalid number of arguments\n")	
+		return
 	}
 
 	sources := timfile.Read()
 	_, exists := sources[command.Options[1]]
 	if exists {
-		var response string;
-		fmt.Printf("%vsource \"%v\" already exists, would you like to replace it? (y/n)%v", ANSI_YELLOW, command.Options[1], ANSI_RESET)
-		_, err := fmt.Scanln(&response)
-		if err != nil {
-			panic(err)
-		}
-
-		if response != "y" {
+		msg := fmt.Sprintf("%vsource \"%v\" already exists, would you like to replace it? (y/N)%v", ANSI_YELLOW, command.Options[1], ANSI_RESET)
+		confirm := confirmAction(msg)
+		if !confirm {
 			fmt.Printf("skipping...")	
 			return
 		}
@@ -47,15 +60,85 @@ func Add(command cli.Command) {
 
 	timfile.Write(sources)
 
-	fmt.Printf("%vadded %v to templates!%v", ANSI_GREEN, source, ANSI_RESET)
+	fmt.Printf("%vadded \"%v\" to templates!%v\n", ANSI_GREEN, source, ANSI_RESET)
 }
 
-func addErr() {
-	fmt.Println("IMPLEMENT TIM ADD ERR MSG")
+func Copy(command cli.Command) {
+	if len(command.Options) != 3 {
+		fmt.Printf("tim - invalid number of arguments\n")
+		return
+	}
+
+	sources := timfile.Read()
+	source, exists := sources[command.Options[1]]
+	if !exists {
+		fmt.Printf("%vcould not find source \"%v\"%v\n", ANSI_YELLOW, command.Options[1], ANSI_RESET)	
+		return 
+	}
+
+	if source.Type == "git" {
+		fmt.Printf("using git to copy source \"%v\"", source.Value)	
+		cmd := exec.Command("git", "clone", source.Value, command.Options[2])
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		fmt.Println(cmd)
+		if err := cmd.Run(); err != nil {
+			fmt.Printf("%vgit encountered an error while copying source \"%v\"%v\n", ANSI_YELLOW, err, ANSI_RESET)
+			return
+		}
+	} else {
+		//TODO: non git source support
+		fmt.Printf("IMPLEMENT ME\n")
+		valid, src := pathExists(source.Value)
+		if !valid {
+			fmt.Printf("%vsource had invalid path \"%v\"%v\n", ANSI_YELLOW, src, ANSI_RESET)	
+			return
+		}
+		valid, dest := pathExists(command.Options[2])
+		if !valid {
+			fmt.Printf("%vcould not find path \"%v\"%v\n", ANSI_YELLOW, dest, ANSI_RESET)	
+			return
+		}
+	}
 }
 
 func Edit(command cli.Command) {
-	fmt.Println("IMPLEMENT EDIT")	
+	stype, source := getSource(command)
+
+	if len(command.Options) < 2 {
+		fmt.Printf("tim - invalid number of arguments\n")
+		return
+	}
+
+	sources := timfile.Read()
+	_, exists := sources[command.Options[1]]
+	if exists {
+		msg := fmt.Sprintf("%vare you sure you want to replace source \"%v\"? (y/N)%v", ANSI_YELLOW, command.Options[1], ANSI_RESET)
+		confirm := confirmAction(msg)
+		if !confirm {
+			fmt.Printf("skipping...")
+			return
+		}
+	} else {
+		msg := fmt.Sprintf("%vsource \"%v\" does not yet exist, would you like to replace it? (y/N)%v", ANSI_YELLOW, command.Options[1], ANSI_RESET)
+		confirm := confirmAction(msg)
+		if !confirm {
+			fmt.Printf("skipping...")
+			return
+		}
+	}
+
+	sources[command.Options[1]] = timfile.Src {
+		Type: stype,
+		Value: source,
+	}
+
+	timfile.Write(sources)
+	if exists {
+		fmt.Printf("%vmodified source \"%v\"!%v\n", ANSI_GREEN, source, ANSI_RESET)
+	} else {
+		fmt.Printf("%vadded \"%v\" to templates!%v\n", ANSI_GREEN, source, ANSI_RESET)
+	}
 }
 
 func List(command cli.Command) {
@@ -74,7 +157,30 @@ func List(command cli.Command) {
 }
 
 func Remove(command cli.Command) {
-	fmt.Println("IMPLEMENT REMOVE")
+	sources := timfile.Read()
+
+	if len(command.Options) != 2 {
+		fmt.Printf("not enough arguments, expected\n\t- tim add <src>\n")
+		return
+	}
+
+	_, exists := sources[command.Options[1]]
+
+	if !exists {
+		fmt.Printf("%vcould not find source \"%v\"%v", ANSI_YELLOW, command.Options[1], ANSI_RESET)	
+		return
+	}
+
+	msg := fmt.Sprintf("%vare you sure you want to delete source \"%v\"? (y/N)%v", ANSI_YELLOW, command.Options[1], ANSI_RESET)
+	confirm := confirmAction(msg)
+	if !confirm {
+		fmt.Printf("skipping...")	
+		return
+	}
+
+	delete(sources, command.Options[1])
+
+	timfile.Write(sources)
 }
 
 func Help(command cli.Command) {
@@ -135,6 +241,8 @@ func getSource(command cli.Command) (string, string) {
 		os.Exit(0)
 	}
 
+	//TODO verify source integrity	
+
 	if !(hasDir || hasFile || hasGit) {
 		if len(command.Options) != 3 {
 			fmt.Printf("tim - invalid number of arguments\n")	
@@ -142,14 +250,44 @@ func getSource(command cli.Command) (string, string) {
 		}
 		return "git", command.Options[2]
 	} else if hasDir {
-		return "dir", dir
+		valid, path := pathExists(dir)
+		if !valid {
+			os.Exit(0)
+		}
+		return "dir", path
 	} else if hasFile {
-		return "file", file
+		valid, path := pathExists(file)
+		if !valid {
+			os.Exit(0)
+		}
+		return "file", path
 	} else if hasGit {
 		fmt.Println(GIT_WARNING)
 		return "git", git
 	}
 
 	panic("[tim/actions] - getSource() did not return a source")
-	return "", ""
+}
+
+func pathExists(p string) (bool, string) {
+	clean := path.Clean(p)
+	var full string 
+	if strings.HasPrefix(clean, "/") {
+		full = clean
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			panic("Could not get current working directory")
+		}
+		full = path.Join(wd, clean)
+	}
+
+	// check if os.Stat returns an error
+	_, err := os.Stat(full)
+
+	if err != nil {
+		fmt.Printf("Invalid path found: %v\n", p)
+	}
+
+	return err == nil, full
 }
