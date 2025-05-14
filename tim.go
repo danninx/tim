@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	cli "github.com/danninx/tim/pkgs/cliparse"
+	cli "github.com/danninx/tim/internals/cli"
 	actions "github.com/danninx/tim/internals/timactions"
 )
 

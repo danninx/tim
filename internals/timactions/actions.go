@@ -9,8 +9,9 @@ import (
 	"slices"
 	"strings"
 
-	cli "github.com/danninx/tim/pkgs/cliparse"
+	cli "github.com/danninx/tim/internals/cli"
 	timfile "github.com/danninx/tim/internals/timfile"
+	copys "github.com/danninx/tim/internals/copy"
 )
 
 const ANSI_BLUE = "\x1b[34m"
@@ -86,19 +87,29 @@ func Copy(command cli.Command) {
 			fmt.Printf("%vgit encountered an error while copying source \"%v\"%v\n", ANSI_YELLOW, err, ANSI_RESET)
 			return
 		}
-	} else {
-		//TODO: non git source support
-		fmt.Printf("IMPLEMENT ME\n")
+	} else if source.Type == "file" {
 		valid, src := pathExists(source.Value)
 		if !valid {
 			fmt.Printf("%vsource had invalid path \"%v\"%v\n", ANSI_YELLOW, src, ANSI_RESET)	
 			return
 		}
-		valid, dest := pathExists(command.Options[2])
+		err := copys.CopyFile(src, command.Options[2])			
+		if err != nil {
+			panic(err)
+		}
+	} else if source.Type == "dir" {
+		valid, src := pathExists(source.Value)
 		if !valid {
-			fmt.Printf("%vcould not find path \"%v\"%v\n", ANSI_YELLOW, dest, ANSI_RESET)	
+			fmt.Printf("%vsource had invalid path \"%v\"%v\n", ANSI_YELLOW, src, ANSI_RESET)	
 			return
 		}
+		err := copys.CopyDir(src, command.Options[2])			
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		fmt.Printf("tim - found an unexpected source type %v for source \"%v\"", source.Type, command.Options[1])
+		return
 	}
 }
 
