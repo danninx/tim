@@ -17,8 +17,6 @@ func main() {
 
 	flagPrefix := "-"
 	flags := map [string] string { 
-		"l": "local",
-		"-local": "local",
 		"f": "file",
 		"file": "file",
 		"d": "directory",
@@ -26,10 +24,7 @@ func main() {
 		"g": "git",
 		"git": "git",
 	}
-	silents := map [string] bool {
-		"l": true,
-		"-local": true,
-	}
+	silents := map [string] bool {}
 
 	cmd := cli.ParseArgs(
 		arguments,
@@ -46,7 +41,7 @@ func main() {
 		"ls": actions.List,
 		"rm": actions.Remove,
 		"help": actions.Help,
-		"testwrite": actions.TestWrite,
+		"testwrite": actions.TestWrite, // TODO remove this when not needed
 	}
 
 	if len(cmd.Options) == 0 {
