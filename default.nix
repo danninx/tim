@@ -1,9 +1,14 @@
+{ pkgs ? import <nixpkgs> { } }:
+
+with pkgs;
 let
-  pkgs = import <nixpkgs> { };
+  version = "0.0.1";
 in
-  pkgs.buildGo124Module {
-    pname = "tim";
-    version = "0.0.1";
-    src = ./.;
-    vendorHash = null;
-  }
+buildGo124Module {
+  pname = "tim";
+  inherit version;
+
+  src = ./.;
+
+  vendorHash = null;
+}
