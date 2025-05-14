@@ -12,22 +12,25 @@
   {
     packages.x86_64-linux.tim = pkgs.buildGo124Module {
       pname = "tim";
-      version = "0.0.1";
+      version = "unversioned";
 
-      src = pkgs.lib.cleanSource self;
-
-      vendorPolicy = "go-modules";
-      vendorHash = pkgs.lib.fakeHash;
+      src = ./.;
+      vendorHash = null;
 
       subPackages = [ "internals/cli" "internals/copy" "internals/timactions" "internals/timfile" "internals/timutils" ];
     };
 
-    defaultPackage.x86_64-linux = self.packages.x86_64-linux.tim;
+    packages.x86_64-linux.default = self.packages.x86_64-linux.tim;
 
     devShell.x86_64-linux = pkgs.mkShell {
       packages = with pkgs; [
         go
       ];
+    };
+
+    apps.x86_64-linux.default = {
+      type = "app";
+      program = "${self.packages.x86_64-linux.default}/bin/tim";
     };
   };
 }
