@@ -195,15 +195,23 @@ func Remove(command cli.Command) {
 }
 
 func Help(command cli.Command) {
-	fmt.Printf("%vusage: tim [cmd] [options]\n%v", ANSI_WHITE, ANSI_RESET)
-	fmt.Println("\tcommands:")
-	fmt.Println("\t\t- add <file|src>:add a template to tim")
-	fmt.Println("\t\t- edit <name>: change the source for a template")
-	fmt.Println("\t\t- ls: list templates and their sources")
-	fmt.Println("\t\t- rm <name>: remove a template from tim")
-	fmt.Println("\t\t- help: show this list")
-	fmt.Println("\toptions:")
-	fmt.Println("\t--local\t\tuse a file or directory path as source (source defaults to git)")
+	// OVERVIEW
+	fmt.Println("usage: tim <cmd> [-f | --file] [-d | --dir | --directory]\n\t\t [-h | --help] [-g | --git]")
+
+	// SOURCES
+	fmt.Println("\nmodifying sources:")
+	fmt.Println("\tadd\t\tadd a template to tim")
+	fmt.Println("\tedit | set\tchange the source for a template")
+	fmt.Println("\tlist | ls\tls: list templates and their sources")
+	fmt.Println("\tremove | rm\tremove a template from tim")
+	fmt.Println("\tcopy | plate\tcopy a source to a given path")
+	fmt.Println("\thelp\t\tshow this list")
+
+	// EXAMPLES
+	fmt.Println("\nexample usage:")
+	fmt.Println("\ttim add <NAME> --dir <PATH>")
+	fmt.Println("\ttim set <NAME> <URL>")
+	fmt.Println("\ttim plate <NAME> <PATH>")
 }
 
 func TestWrite(command cli.Command) {

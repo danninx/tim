@@ -2,6 +2,7 @@ package timcli;
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -26,7 +27,7 @@ func isFlag(str string, prefix string, valid map [string] string) (string, bool)
 		if v {
 			return after, true
 		} else {
-			panic(fmt.Sprintf("tim - Invalid flag %v\n", str))
+			fmt.Printf("tim - Invalid flag \"%v\"\n", str)
 			return "", false
 		}
 	} else {
@@ -40,6 +41,7 @@ func ParseArgs(args []string, flagPrefix string, validFlags map [string] string,
 
 	for i := 1; i < len(args); i++ {
 		val, validFlag := isFlag(args[i], flagPrefix, validFlags)
+		if val == "" {os.Exit(0)}
 		if validFlag {
 			silent := isSilent(val, silents)	
 			if silent {

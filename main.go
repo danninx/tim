@@ -18,11 +18,13 @@ func main() {
 	flagPrefix := "-"
 	flags := map [string] string { 
 		"f": "file",
-		"file": "file",
+		"-file": "file",
 		"d": "directory",
-		"dir": "directory",
+		"-dir": "directory",
+		"-directory": "directory",
 		"g": "git",
-		"git": "git",
+		"-git": "git",
+		"-debug": "debug",
 	}
 	silents := map [string] bool {}
 
@@ -32,13 +34,21 @@ func main() {
 		flags,
 		silents,
 	)
-	fmt.Println(cli.CommandString(cmd))
+	_, debug := cmd.Flags["debug"]
+	if debug { fmt.Println(cli.CommandString(cmd)) }
 
 	subcommands := map [string] func(cli.Command) { 
 		"add": actions.Add,
+
 		"copy": actions.Copy,
+		"plate": actions.Copy, // for the pun ...
+
 		"edit": actions.Edit,
+		"set": actions.Edit,
+
+		"list": actions.List,
 		"ls": actions.List,
+
 		"rm": actions.Remove,
 		"help": actions.Help,
 		"testwrite": actions.TestWrite, // TODO remove this when not needed
