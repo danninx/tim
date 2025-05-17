@@ -23,9 +23,9 @@ func isSilent(str string, silents map [string] bool) bool {
 func isFlag(str string, prefix string, valid map [string] string) (string, bool) {
 	after, found := strings.CutPrefix(str, prefix)
 	if found { 
-		_, v := valid[after]
+		name, v := valid[after]
 		if v {
-			return after, true
+			return name, true
 		} else {
 			fmt.Printf("tim - Invalid flag \"%v\"\n", str)
 			return "", false
@@ -45,10 +45,10 @@ func ParseArgs(args []string, flagPrefix string, validFlags map [string] string,
 		if validFlag {
 			silent := isSilent(val, silents)	
 			if silent {
-				flags[validFlags[val]] = "true"
+				flags[val] = "true"
 			} else {
 				i++
-				flags[validFlags[val]] = args[i]
+				flags[val] = args[i]
 			}
 		} else {
 			options = append(options, val)

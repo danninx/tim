@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
 	cli "github.com/danninx/tim/internals/cli"
-	actions "github.com/danninx/tim/internals/timactions"
+	actions "github.com/danninx/tim/internals/actions"
 )
 
 
@@ -25,8 +26,12 @@ func main() {
 		"g": "git",
 		"-git": "git",
 		"-debug": "debug",
+		"-filter-git": "filter-git",
 	}
-	silents := map [string] bool {}
+	silents := map [string] bool {
+		"debug" : true,
+		"filter-git": true,
+	}
 
 	cmd := cli.ParseArgs(
 		arguments,
@@ -34,8 +39,15 @@ func main() {
 		flags,
 		silents,
 	)
+
 	_, debug := cmd.Flags["debug"]
-	if debug { fmt.Println(cli.CommandString(cmd)) }
+	if debug { 
+		fmt.Println(cli.CommandString(cmd)) 
+		fmt.Println("flags detected:")
+		for k, v := range cmd.Flags {
+			fmt.Println("\t", k, v)
+		}
+	}
 
 	subcommands := map [string] func(cli.Command) { 
 		"add": actions.Add,

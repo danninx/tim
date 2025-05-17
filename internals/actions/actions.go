@@ -1,17 +1,16 @@
-package timactions;
+package actions;
 
 import ( 
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"slices"
 	"strings"
 
 	cli "github.com/danninx/tim/internals/cli"
 	timfile "github.com/danninx/tim/internals/timfile"
-	copys "github.com/danninx/tim/internals/copy"
+	files "github.com/danninx/tim/internals/files"
 )
 
 const ANSI_BLUE = "\x1b[34m"
@@ -70,6 +69,8 @@ func Copy(command cli.Command) {
 		return
 	}
 
+	_, filterGit := command.Flags["filter-git"]
+
 	sources := timfile.Read()
 	source, exists := sources[command.Options[1]]
 	if !exists {
@@ -78,14 +79,30 @@ func Copy(command cli.Command) {
 	}
 
 	if source.Type == "git" {
-		fmt.Printf("using git to copy source \"%v\"", source.Value)	
-		cmd := exec.Command("git", "clone", source.Value, command.Options[2])
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		fmt.Println(cmd)
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("%vgit encountered an error while copying source \"%v\"%v\n", ANSI_YELLOW, err, ANSI_RESET)
-			return
+		if filterGit {
+			tmp, err := files.TempGit(source.Value)
+			if err != nil {
+				fmt.Printf("%verror making temporary git clone:\n%v\n%v", ANSI_YELLOW, err, ANSI_RESET)
+				return
+			}
+			fmt.Println("copying cleaned source...")
+			err = files.CopyDir(tmp, command.Options[2])	
+			if err != nil {
+				fmt.Printf("%verror copying files from temporary clone:\n%v\n%v", ANSI_YELLOW, err, ANSI_RESET)
+				return
+			}
+			fmt.Println("cleaning temporary directory...")
+			err = files.CleanTmp()
+			if err != nil {
+				fmt.Printf("%vthere was an issue removing the temporary directory \"%v\":\n%v%v\n", ANSI_YELLOW, tmp, ANSI_RESET, err)
+				return
+			}
+		} else {
+			err := files.GitClone(source.Value, command.Options[2])
+			if err != nil {
+				fmt.Printf("%vgit encountered an error while copying source \"%v\"%v\n", ANSI_YELLOW, err, ANSI_RESET)
+				return
+			}
 		}
 	} else if source.Type == "file" {
 		valid, src := pathExists(source.Value)
@@ -93,7 +110,7 @@ func Copy(command cli.Command) {
 			fmt.Printf("%vsource had invalid path \"%v\"%v\n", ANSI_YELLOW, src, ANSI_RESET)	
 			return
 		}
-		err := copys.CopyFile(src, command.Options[2])			
+		err := files.CopyFile(src, command.Options[2])			
 		if err != nil {
 			panic(err)
 		}
@@ -103,9 +120,28 @@ func Copy(command cli.Command) {
 			fmt.Printf("%vsource had invalid path \"%v\"%v\n", ANSI_YELLOW, src, ANSI_RESET)	
 			return
 		}
-		err := copys.CopyDir(src, command.Options[2])			
-		if err != nil {
-			panic(err)
+
+		if filterGit {
+			tmp, err := files.TempCopy(src)	
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("copying cleaned source...")
+			err = files.CopyDir(tmp, command.Options[2])
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("cleaning temporary directory...")
+			err = files.CleanTmp()
+			if err != nil {
+				fmt.Printf("%vthere was an issue removing the temporary directory \"%v\":\n%v%v\n", ANSI_YELLOW, tmp, ANSI_RESET, err)
+				return
+			}
+		} else {
+			err := files.CopyDir(src, command.Options[2])			
+			if err != nil {
+				panic(err)
+			}
 		}
 	} else {
 		fmt.Printf("tim - found an unexpected source type %v for source \"%v\"", source.Type, command.Options[1])

@@ -6,8 +6,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
+
+func timTmp() string {
+	return filepath.Join(os.TempDir(), "tim")
+}
 
 // Copy file from src path to dest path
 func CopyFile(src string, dest string) error {
@@ -76,3 +81,36 @@ func CopyDir(src string, dest string) error {
 
 	return nil
 }
+
+func GitClone(src string, dest string) error {
+	fmt.Printf("using git to copy source \"%v\"\n", src)	
+	cmd := exec.Command("git", "clone", src, dest)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	fmt.Println(cmd)
+	return cmd.Run()	
+}
+
+// Makes a directory clone of `src`, and then removes any present .git directory
+func TempCopy(src string) (string, error) { 
+	dest := timTmp()	
+	err := CopyDir(src, dest)	
+	if err != nil { return "", err }
+	gitPath := filepath.Join(dest, ".git")	
+	err = os.RemoveAll(gitPath)
+	return dest, err
+}
+
+// Makes a git clone of `src`, and then removes the .git directory
+func TempGit(src string) (string, error) {
+	dest := timTmp()
+	err := GitClone(src, dest)
+	if err != nil { return "", err }
+	gitPath := filepath.Join(dest, ".git")
+	err = os.RemoveAll(gitPath)
+	return dest, err
+}
+
+func CleanTmp() error {
+	return os.RemoveAll(timTmp())
+} 
