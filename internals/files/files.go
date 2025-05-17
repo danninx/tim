@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 )
 
+// Returns path /../tmp/tim
 func timTmp() string {
 	return filepath.Join(os.TempDir(), "tim")
 }
@@ -22,12 +23,21 @@ func CopyFile(src string, dest string) error {
 	}
 	defer srcFile.Close()
 
-	destFile, err := os.OpenFile(dest, os.O_WRONLY | os.O_CREATE, 0777)
+	// check if destination path is an existing directory, if so append source file name, otherwise copy as though destination is a file
+	var destFilePath string
+	destInfo, err := os.Stat(dest)	
+
+	if destInfo.IsDir() {
+		destFilePath = filepath.Join(dest, filepath.Base(src))
+	} else {
+		destFilePath = dest
+	}
+
+	destFile, err := os.OpenFile(destFilePath, os.O_WRONLY | os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer destFile.Close()
-
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
 		return err
@@ -38,7 +48,7 @@ func CopyFile(src string, dest string) error {
 		return err
 	}
 
-	return os.Chmod(dest, info.Mode())
+	return os.Chmod(destFilePath, info.Mode())
 }
 
 // Copy dir from src path to dest path

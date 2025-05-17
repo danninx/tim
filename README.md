@@ -64,7 +64,5 @@ in
 *(I'm gonna move this to github issues or a trello in a bit)*
 
 - Check git sources upon adding for validity
-- Add a `--filter-git` flag so that git histories aren't copied with templates
 - Clean up the CLI parser so I can re-use it for some other stuff (I must resist [cobra](https://github.com/spf13/cobra))
 - Add flags to help menu
-- It's kinda silly to have the full path for a file copy, should just use the parent directory instead so I can `tim plate make .`
