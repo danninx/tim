@@ -6,21 +6,19 @@ A source can be a file, directory, or git repository (heads up if your directory
 
 `tim` keeps track of sources in a `$HOME/.timfile`, which also means you can port your template aliases (mainly git, since everything else is local) across different machines if needed.
 
-As a quick summary, to add a source, say a file "`./Makefile`" to your sources with the alias **make**, you can use
+As a quick summary, to add a source, say a file "`Makefile`" to your sources with the alias **make**, you can use
 
 ```sh
-tim add make -f ./Makefile
+tim add make -f Makefile
 ```
-
-You can use the `-d` flag for directories, otherwise tim will default to a git repository as a source.
 
 To then use that source for a template, you can use the `tim plate` command (see what I did there?)
 
 ```sh 
-tim plate make ./Makefile
+tim plate make Makefile
 ```
 
-<sup>If you so insist, you can use the nasty `tim copy` command instead...</sup>
+<sup>If you so insist, you can use a more familiar `tim clone` command instead...</sup>
 
 I've tested this a bit using a [report format I made for some lab classes this last semester](https://github.com/danninx/tu-report.sty):
 
@@ -30,7 +28,7 @@ tim plate report .
 ```
 
 ## Installation and Prerequisites
-If you (most likely) plan on using git repositories as a source, you will need to have `git` installed and setup (with whatever authorization you need, normally an SSH key) on your system. I provide the `linux/amd64` build in the repository, but if that doesn't fit your system you will need to build from source. 
+If you (most likely) plan on using git repositories as a source, you will need to have `git` installed and setup (with whatever authorization you need, normally an SSH key) on your system. 
 
 ```sh
 git clone https://github.com/danninx/tim.git && cd tim
@@ -43,10 +41,7 @@ cp ./tim /usr/local/bin/tim         # wherever
 sudo chmod +x /usr/local/bin/tim    # make tim executable
 ```
 
-I might setup a github action soon to build for more common systems
-
-<sup> for those that believe in church of nix, you can grab the latest commit info using `nix-prefetch-git git@github.com:danninx/tim` import it explicitly to include in your packages </sup>
-
+### Nix Configuration 
 ```
 let
  tim = (pkgs.callPackage (pkgs.fetchFromGitHub {
@@ -56,13 +51,17 @@ let
     sha256 = <SHA256>;
   }) {});
 in
+...
+packages = [
+    pkgs.a
+    pkgs.b
+    tim
+];
 ```
 
-<sup> I've probably broken about a hundred nix standards in that expression, but it works... currently looking into better ways</sup>
-
 ## To-Do
-*(I'm gonna move this to github issues or a trello in a bit)*
 
+- Move to larger configuration directory at `$HOME/.tim.d`
 - Check git sources upon adding for validity
-- Clean up the CLI parser so I can re-use it for some other stuff (I must resist [cobra](https://github.com/spf13/cobra))
-- Add flags to help menu
+- Local cache based templating
+- Editable cache and source sychronization
