@@ -5,7 +5,6 @@ import (
 )
 
 type Plate struct {
-	Name 	string
 	Type 	string
 	Path 	string
 }
