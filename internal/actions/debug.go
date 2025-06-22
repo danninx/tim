@@ -18,6 +18,4 @@ func PrintDir(ctx context.Context, cmd *cli.Command) error {
 		fmt.Println(path)
 		return nil
 	})
-
-	return nil
 }

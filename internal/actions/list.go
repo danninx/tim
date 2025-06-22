@@ -5,28 +5,28 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
-	"github.com/danninx/tim/internal/timfile"
 	"github.com/urfave/cli/v3"
 )
 
 
 func List(ctx context.Context, cmd *cli.Command) error {
-	fmt.Println("tim sources:")
-	sources, err := timfile.Read()
+	config, err := conf.Load()
 
 	if (err != nil) {
 		return err
 	}
 
 	var keys[] string
-	for k := range sources {
+	for k := range config.Plates {
 		keys = append(keys, k)
 	}
 	slices.Sort(keys)
 
+	fmt.Println("tim sources:")
 	for _, k := range keys {
-		printPlateLine(k, sources[k])
+		printPlateLine(k, config.Plates[k])
 	}
 
 	return nil
