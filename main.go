@@ -1,82 +1,103 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"log"
 	"os"
 
-	cli "github.com/danninx/tim/internals/cli"
-	actions "github.com/danninx/tim/internals/actions"
+	"github.com/danninx/tim/internal/actions"
+	"github.com/urfave/cli/v3"
 )
 
-
 func main() {
-	arguments := os.Args
-	if len(arguments) == 1 {
-		actions.Help(cli.Command{})
-		os.Exit(0)
+	cmd := &cli.Command{
+		Name: "tim",
+		Usage: "manage your template files locally",
+		Commands: []*cli.Command {
+			// TEMPLATE
+			{
+				Name: "plate",
+				Aliases: []string{"clone"},
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name: "name",
+					},
+					&cli.StringArg{
+						Name: "dest",
+					},
+				},
+				Usage: "create files using a plate",
+				Action: actions.Clone,
+				Category: "managemenet",
+			},
+
+			// MANAGE
+			{
+				Name: "add",
+				Aliases: []string{"link"},
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name: "type",
+					},
+					&cli.StringArg{
+						Name: "name",
+					},
+					&cli.StringArg{
+						Name: "path",
+					},
+				},
+				Usage: "add a plate into your templates",
+				Action: actions.Add,
+				Category: "management",
+			},
+			{
+				Name: "remove",
+				Aliases: []string{"rm"},
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name: "name",
+					},
+				},
+				Usage: "remove a plate from your templates",
+				Action: actions.Remove,
+				Category: "management",
+			},
+
+			// INFO
+			{
+				Name: "list",
+				Aliases: []string{"ls"},
+				Usage: "list current plates and basic info",
+				Action: actions.List,
+				Category: "info",
+			},
+			{
+				Name: "show",
+				Aliases: []string{"get"},
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name: "name",
+					},
+				},
+				Usage: "show information about a specific source",
+				Action: actions.Show,
+				Category: "info",
+			},
+
+			// DEBUG
+			{
+				Name: "print",
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name: "dir",
+					},
+				},
+				Action: actions.PrintDir,
+			},
+		},
 	}
 
-	flagPrefix := "-"
-	flags := map [string] string { 
-		"f": "file",
-		"-file": "file",
-		"d": "directory",
-		"-dir": "directory",
-		"-directory": "directory",
-		"g": "git",
-		"-git": "git",
-		"-debug": "debug",
-		"-filter-git": "filter-git",
-	}
-	silents := map [string] bool {
-		"debug" : true,
-		"filter-git": true,
-	}
-
-	cmd := cli.ParseArgs(
-		arguments,
-		flagPrefix,
-		flags,
-		silents,
-	)
-
-	_, debug := cmd.Flags["debug"]
-	if debug { 
-		fmt.Println(cli.CommandString(cmd)) 
-		fmt.Println("flags detected:")
-		for k, v := range cmd.Flags {
-			fmt.Println("\t", k, v)
-		}
-	}
-
-	subcommands := map [string] func(cli.Command) { 
-		"add": actions.Add,
-
-		"copy": actions.Copy,
-		"plate": actions.Copy, // for the pun ...
-
-		"edit": actions.Edit,
-		"set": actions.Edit,
-
-		"list": actions.List,
-		"ls": actions.List,
-
-		"rm": actions.Remove,
-		"help": actions.Help,
-		"testwrite": actions.TestWrite, // TODO remove this when not needed
-	}
-
-	if len(cmd.Options) == 0 {
-		actions.Help(cmd)
-		os.Exit(0)
-	}
-
-	commandAction := cmd.Options[0]
-	f, exists := subcommands[commandAction]
-	if exists {
-		f(cmd)
-	} else {
-		panic(fmt.Sprintf("tim - unrecognized action %v\n", commandAction))
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		log.Fatal(err)
 	}
 }
-
