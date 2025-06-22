@@ -1,4 +1,4 @@
-package timfile;
+package timfile
 
 import (
 	"bufio"
@@ -6,8 +6,9 @@ import (
 	"log"
 	"os"
 	"strings"
-)
 
+	"github.com/danninx/tim/internal/plate"
+)
 
 const TIM_FILE_NAME = "/.timfile"
 type Src struct {
@@ -15,7 +16,7 @@ type Src struct {
 	Value 	string
 }
 
-func Read() map [string] Src {
+func Read() (map [string] plate.Plate, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Panic(err)
@@ -24,12 +25,12 @@ func Read() map [string] Src {
 	full := home + TIM_FILE_NAME
 	file, err := os.OpenFile(full, os.O_RDONLY | os.O_CREATE, 0777)
 	if err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	sources := map [string] Src {}
+	sources := map [string] plate.Plate {}
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -43,34 +44,33 @@ func Read() map [string] Src {
 			fmt.Printf("improperly formatted source was found:\n\t\"%v\"\n", line)
 			continue
 		}
-		s := Src{
+		s := plate.Plate {
 			Type: split[0],
-			Value: split[1],
+			Path: split[1],
 		}
 		sources[parts[0]] = s
 	}
-	return sources
+	return sources, nil
 }
 
-func Write(sources map [string] Src) {
+func Write(sources map [string] plate.Plate) error {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	full := home + TIM_FILE_NAME
 	file, err := os.OpenFile(full, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0777)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 	defer file.Close()
 
 	for k := range sources {
-		val := srcToString(sources[k])
+		val := plate.ToString(sources[k])
 		fmt.Fprintf(file, "%v=%v\n", k, val)
 	}
+
+	return nil
 }
 
-func srcToString(source Src) string {
-	return fmt.Sprintf("%v,%v", source.Type, source.Value)
-}

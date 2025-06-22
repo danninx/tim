@@ -1,10 +1,10 @@
 // Timfile copy source code for copying files and directories
-package copy;
+package files;
 
 import (
-	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -26,18 +26,28 @@ func CopyFile(src string, dest string) error {
 	// check if destination path is an existing directory, if so append source file name, otherwise copy as though destination is a file
 	var destFilePath string
 	destInfo, err := os.Stat(dest)	
-
-	if destInfo.IsDir() {
-		destFilePath = filepath.Join(dest, filepath.Base(src))
+	if err != nil {
+		if (os.IsNotExist(err)) {
+			destFilePath = dest
+		} else {
+			return err
+		}
 	} else {
-		destFilePath = dest
+		if destInfo.IsDir() {
+			destFilePath = filepath.Join(dest, filepath.Base(src))
+		} else {
+			destFilePath = dest
+		}
 	}
+
+	
 
 	destFile, err := os.OpenFile(destFilePath, os.O_WRONLY | os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer destFile.Close()
+
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
 		return err
@@ -53,43 +63,45 @@ func CopyFile(src string, dest string) error {
 
 // Copy dir from src path to dest path
 func CopyDir(src string, dest string) error {
-	srcInfo, err := os.Stat(src)	
-	if err != nil {
-		return err
-	}
-
-	if !srcInfo.IsDir() {
-		return errors.New(fmt.Sprintf("source path \"%v\" was not a directory\n", src))
-	}
-
-	err = os.MkdirAll(dest, srcInfo.Mode())
-	if err != nil {
-		return err
-	}
-
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		destPath := filepath.Join(dest, entry.Name())
-
-		if entry.IsDir() {
-			err := CopyDir(srcPath, destPath)
-			if err != nil {
-				return err
-			}
-		} else {
-			err := CopyFile(srcPath, destPath)
-			if err != nil {
-				return err
-			}
+	fsys := os.DirFS(src)
+	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
-	}
 
-	return nil
+		fpath, err := filepath.Localize(path)
+		if err != nil {
+			return err
+		}
+		newPath := filepath.Join(dest, fpath)
+		if d.IsDir() {
+			return os.MkdirAll(newPath, 0777)
+		}
+
+		if !d.Type().IsRegular() {
+			return &os.PathError{Op: "CopyFS", Path: path, Err: os.ErrInvalid}
+		}
+
+		r, err := fsys.Open(path)
+		if err != nil {
+			return err
+		}
+		defer r.Close()
+		info, err := r.Stat()
+		if err != nil {
+			return err
+		}
+		w, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666|info.Mode()&0777)
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(w, r); err != nil {
+			w.Close()
+			return &os.PathError{Op: "Copy", Path: newPath, Err: err}
+		}
+		return w.Close()
+	})
 }
 
 func GitClone(src string, dest string) error {
@@ -103,6 +115,7 @@ func GitClone(src string, dest string) error {
 
 // Makes a directory clone of `src`, and then removes any present .git directory
 func TempCopy(src string) (string, error) { 
+	CleanTmp()
 	dest := timTmp()	
 	err := CopyDir(src, dest)	
 	if err != nil { return "", err }
@@ -113,6 +126,7 @@ func TempCopy(src string) (string, error) {
 
 // Makes a git clone of `src`, and then removes the .git directory
 func TempGit(src string) (string, error) {
+	CleanTmp()
 	dest := timTmp()
 	err := GitClone(src, dest)
 	if err != nil { return "", err }
