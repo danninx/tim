@@ -7,9 +7,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
-	"github.com/danninx/tim/internal/timfile"
-	"github.com/urfave/cli/v3"
 )
 
 /*
@@ -62,21 +61,13 @@ func ConfirmAction(msg string) (bool, error) {
 	return response == "y" || response == "Y", nil
 }
 
-func EnforceNumArgs(expected int, cmd *cli.Command) error {
-	if cmd.Args().Len() != expected {
-		return &INVALID_NUM_ARGS{ Expected: expected, Received: cmd.Args().Len() }
-	}
-
-	return nil
-}
-
 func GetPlate(name string) (plate.Plate, error) {
-	plates, err := timfile.Read()
+	config, err := conf.Load()
 	if (err != nil) {
 		return plate.Plate{}, err
 	}
 
-	plate, exists := plates[name]	
+	plate, exists := config.Plates[name]	
 	if !exists {
 		return plate, &NO_PLATE_EXISTS{ Name: name }
 	}

@@ -1,31 +1,29 @@
-package timfile
+package conf
 
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/danninx/tim/internal/plate"
 )
 
-const TIM_FILE_NAME = "/.timfile"
-type Src struct {
-	Type 	string
-	Value 	string
+type LegacyConfig struct {
+	path string
 }
 
-func Read() (map [string] plate.Plate, error) {
-	home, err := os.UserHomeDir()
+func (legacy LegacyConfig) Read() (TimConfig, error) {
+	dir, err := getTimDirectory()
 	if err != nil {
-		log.Panic(err)
+		return TimConfig{}, err
 	}
 
-	full := home + TIM_FILE_NAME
+	full := path.Join(dir, legacy.path)
 	file, err := os.OpenFile(full, os.O_RDONLY | os.O_CREATE, 0777)
 	if err != nil {
-		return nil, err
+		return TimConfig{}, err
 	}
 	defer file.Close()
 
@@ -50,24 +48,29 @@ func Read() (map [string] plate.Plate, error) {
 		}
 		sources[parts[0]] = s
 	}
-	return sources, nil
+
+	config := TimConfig{
+		Options: TimOptions{},
+		Plates: sources,
+	}
+	return config, nil
 }
 
-func Write(sources map [string] plate.Plate) error {
-	home, err := os.UserHomeDir()
+func (legacy LegacyConfig) Write(config TimConfig) error {
+	dir, err := getTimDirectory()
 	if err != nil {
 		return err
 	}
 
-	full := home + TIM_FILE_NAME
+	full := path.Join(dir, legacy.path)
 	file, err := os.OpenFile(full, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	for k := range sources {
-		val := plate.ToString(sources[k])
+	for k := range config.Plates {
+		val := plate.ToString(config.Plates[k])
 		fmt.Fprintf(file, "%v=%v\n", k, val)
 	}
 

@@ -4,18 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/danninx/tim/internal/timfile"
+	"github.com/danninx/tim/internal/conf"
 	"github.com/urfave/cli/v3"
 )
 
 func Remove(ctx context.Context, cmd *cli.Command) error {
-	sources, err := timfile.Read()
+	config, err := conf.Load()
 	if (err != nil) {
 		return err
 	}
 
 	name := cmd.StringArg("name")
-	_, exists := sources[name]
+	_, exists := config.Plates[name]
 
 	if !exists {
 		return &NO_PLATE_EXISTS{
@@ -33,9 +33,9 @@ func Remove(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	delete(sources, name)
+	delete(config.Plates, name)
 
-	timfile.Write(sources)
+	conf.Save(config)
 
 	return nil
 }
