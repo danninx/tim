@@ -9,8 +9,8 @@ import (
 )
 
 type TimConfig struct {
-	Options TimOptions `toml:"options"`
-	Plates map [string] plate.Plate `toml:"plates"`
+	Options TimOptions                     `toml:"options"`
+	Plates  map[string]plate.UnloadedPlate `toml:"plates"`
 }
 
 type TimOptions struct {
@@ -23,7 +23,7 @@ type ConfigFile interface {
 }
 
 func Load() (TimConfig, error) {
-	file, err := newConfigFile()	
+	file, err := newConfigFile()
 	if err != nil {
 		return TimConfig{}, err
 	}
@@ -71,15 +71,14 @@ func SetConfFileType(t string) error {
 	}
 
 	full := path.Join(dir, ".tim")
-	file, err := os.OpenFile(full, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0777)
+	file, err := os.OpenFile(full, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
 	fmt.Fprintln(file, t)
-	file.Close()	
+	file.Close()
 
 	return nil
 }
-

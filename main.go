@@ -11,12 +11,12 @@ import (
 
 func main() {
 	cmd := &cli.Command{
-		Name: "tim",
+		Name:  "tim",
 		Usage: "manage your template files locally",
-		Commands: []*cli.Command {
+		Commands: []*cli.Command{
 			// TEMPLATE
 			{
-				Name: "plate",
+				Name:    "plate",
 				Aliases: []string{"clone"},
 				Arguments: []cli.Argument{
 					&cli.StringArg{
@@ -26,14 +26,14 @@ func main() {
 						Name: "dest",
 					},
 				},
-				Usage: "create files using a plate",
-				Action: actions.Clone,
+				Usage:    "create files using a plate",
+				Action:   actions.Clone,
 				Category: "managemenet",
 			},
 
 			// MANAGE
 			{
-				Name: "add",
+				Name:    "add",
 				Aliases: []string{"link"},
 				Arguments: []cli.Argument{
 					&cli.StringArg{
@@ -43,44 +43,44 @@ func main() {
 						Name: "name",
 					},
 					&cli.StringArg{
-						Name: "path",
+						Name: "origin",
 					},
 				},
-				Usage: "add a plate into your templates",
-				Action: actions.Add,
+				Usage:    "add a plate into your templates",
+				Action:   actions.Add,
 				Category: "management",
 			},
 			{
-				Name: "remove",
+				Name:    "remove",
 				Aliases: []string{"rm"},
 				Arguments: []cli.Argument{
 					&cli.StringArg{
 						Name: "name",
 					},
 				},
-				Usage: "remove a plate from your templates",
-				Action: actions.Remove,
+				Usage:    "remove a plate from your templates",
+				Action:   actions.Remove,
 				Category: "management",
 			},
 
 			// INFO
 			{
-				Name: "list",
-				Aliases: []string{"ls"},
-				Usage: "list current plates and basic info",
-				Action: actions.List,
+				Name:     "list",
+				Aliases:  []string{"ls"},
+				Usage:    "list current plates and basic info",
+				Action:   actions.List,
 				Category: "info",
 			},
 			{
-				Name: "show",
+				Name:    "show",
 				Aliases: []string{"get"},
 				Arguments: []cli.Argument{
 					&cli.StringArg{
 						Name: "name",
 					},
 				},
-				Usage: "show information about a specific source",
-				Action: actions.Show,
+				Usage:    "show information about a specific source",
+				Action:   actions.Show,
 				Category: "info",
 			},
 
@@ -92,8 +92,8 @@ func main() {
 						Name: "type",
 					},
 				},
-				Usage: "migrate configuration file to a specific format",
-				Action: actions.Migrate,
+				Usage:    "migrate configuration file to a specific format",
+				Action:   actions.Migrate,
 				Category: "config",
 			},
 

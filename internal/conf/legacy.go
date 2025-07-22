@@ -21,14 +21,14 @@ func (legacy LegacyConfig) Read() (TimConfig, error) {
 	}
 
 	full := path.Join(dir, legacy.path)
-	file, err := os.OpenFile(full, os.O_RDONLY | os.O_CREATE, 0777)
+	file, err := os.OpenFile(full, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return TimConfig{}, err
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	sources := map [string] plate.Plate {}
+	sources := map[string]plate.Plate{}
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -42,7 +42,7 @@ func (legacy LegacyConfig) Read() (TimConfig, error) {
 			fmt.Printf("improperly formatted source was found:\n\t\"%v\"\n", line)
 			continue
 		}
-		s := plate.Plate {
+		s := plate.Plate{
 			Type: split[0],
 			Path: split[1],
 		}
@@ -51,7 +51,7 @@ func (legacy LegacyConfig) Read() (TimConfig, error) {
 
 	config := TimConfig{
 		Options: TimOptions{},
-		Plates: sources,
+		Plates:  sources,
 	}
 	return config, nil
 }
@@ -63,7 +63,7 @@ func (legacy LegacyConfig) Write(config TimConfig) error {
 	}
 
 	full := path.Join(dir, legacy.path)
-	file, err := os.OpenFile(full, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0777)
+	file, err := os.OpenFile(full, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -76,4 +76,3 @@ func (legacy LegacyConfig) Write(config TimConfig) error {
 
 	return nil
 }
-

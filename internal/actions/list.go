@@ -10,15 +10,14 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-
 func List(ctx context.Context, cmd *cli.Command) error {
 	config, err := conf.Load()
 
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
-	var keys[] string
+	var keys []string
 	for k := range config.Plates {
 		keys = append(keys, k)
 	}
@@ -34,16 +33,15 @@ func List(ctx context.Context, cmd *cli.Command) error {
 
 func printPlateLine(name string, p plate.Plate) {
 	n := fmt.Sprintf("%v%-15s%v", ANSI_GREEN, name, ANSI_RESET)
-	i := fmt.Sprintf("%-s\n", p.Path)
+	i := fmt.Sprintf("%-s\n", p.Origin())
 	var t string
-	switch p.Type {
+	switch p.Type() {
 	case "git":
-		t = fmt.Sprintf("%s%-8s%s", ANSI_YELLOW, p.Type, ANSI_RESET)
+		t = fmt.Sprintf("%s%-8s%s", ANSI_YELLOW, p.Type(), ANSI_RESET)
 	case "dir":
-		t = fmt.Sprintf("%s%-8s%s", ANSI_BLUE, p.Type, ANSI_RESET)
+		t = fmt.Sprintf("%s%-8s%s", ANSI_BLUE, p.Type(), ANSI_RESET)
 	case "file":
-		t = fmt.Sprintf("%s%-8s%s", ANSI_MAGENTA, p.Type, ANSI_RESET)
+		t = fmt.Sprintf("%s%-8s%s", ANSI_MAGENTA, p.Type(), ANSI_RESET)
 	}
 	fmt.Printf("- %-s%-s%-s", n, t, i)
 }
-

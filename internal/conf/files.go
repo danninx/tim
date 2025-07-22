@@ -11,7 +11,7 @@ const DEFAULT_TYPE = "toml"
 
 func newConfigFile() (ConfigFile, error) {
 	dir, err := getTimDirectory()
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	dot := path.Join(dir, ".tim")
@@ -21,12 +21,12 @@ func newConfigFile() (ConfigFile, error) {
 	if !(err == nil && !info.IsDir()) { //
 		fmt.Printf("no configuration file was found, creating a 'tim.toml' in %s\n", dir)
 		err = SetConfFileType(DEFAULT_TYPE)
-		if (err != nil) {
+		if err != nil {
 			return nil, err
 		}
 		filetype = DEFAULT_TYPE
 	} else {
-		file, err := os.OpenFile(dot, os.O_RDONLY | os.O_CREATE, 0777)
+		file, err := os.OpenFile(dot, os.O_RDONLY|os.O_CREATE, 0777)
 		if err != nil {
 			return nil, err
 		}
@@ -58,6 +58,6 @@ func getTimDirectory() (string, error) {
 	return path.Join(home, ".config/tim"), nil
 }
 
-func validFiletypes() string { 
+func validFiletypes() string {
 	return "legacy, toml"
 }
