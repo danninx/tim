@@ -29,12 +29,22 @@ func (plate *gitPlate) Type() string {
 }
 
 func (plate *gitPlate) Sync() error {
-	fmt.Println("Git plate syncing is not available at this time. Please raise any concerns at the GitHub")
+	err := os.RemoveAll(plate.path)
+	if err != nil {
+		return err
+	}
+
+	err = GitClone(plate.origin, plate.path)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("succesfully synchronized \"%v\" from repository", plate.name)
 	return nil
 }
 
 func (plate *gitPlate) Copy(destination string) error {
-	return GitClone(plate.origin, destination)
+	return CopyDir(plate.path, destination)
 }
 
 func (plate *gitPlate) Delete() error {

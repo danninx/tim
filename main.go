@@ -26,9 +26,10 @@ func main() {
 						Name: "dest",
 					},
 				},
-				Usage:    "create files using a plate",
-				Action:   actions.Clone,
-				Category: "management",
+				ArgsUsage: "<name> <dest>",
+				Usage:     "create files using a plate",
+				Action:    actions.Clone,
+				Category:  "management",
 			},
 
 			// MANAGE
@@ -46,9 +47,10 @@ func main() {
 						Name: "origin",
 					},
 				},
-				Usage:    "add a plate into your templates",
-				Action:   actions.Add,
-				Category: "management",
+				ArgsUsage: "<type> <name> <origin>",
+				Usage:     "add a plate into your templates",
+				Action:    actions.Add,
+				Category:  "management",
 			},
 			{
 				Name:    "remove",
@@ -58,9 +60,10 @@ func main() {
 						Name: "name",
 					},
 				},
-				Usage:    "remove a plate from your templates",
-				Action:   actions.Remove,
-				Category: "management",
+				ArgsUsage: "<name>",
+				Usage:     "remove a plate from your templates",
+				Action:    actions.Remove,
+				Category:  "management",
 			},
 
 			// INFO
@@ -79,9 +82,10 @@ func main() {
 						Name: "name",
 					},
 				},
-				Usage:    "show information about a specific source",
-				Action:   actions.Show,
-				Category: "info",
+				ArgsUsage: "<name>",
+				Usage:     "show information about a specific source",
+				Action:    actions.Show,
+				Category:  "info",
 			},
 
 			// CONFIG
@@ -92,20 +96,10 @@ func main() {
 						Name: "type",
 					},
 				},
-				Usage:    "migrate configuration file to a specific format",
-				Action:   actions.Migrate,
-				Category: "config",
-			},
-
-			// DEBUG
-			{
-				Name: "print",
-				Arguments: []cli.Argument{
-					&cli.StringArg{
-						Name: "dir",
-					},
-				},
-				Action: actions.PrintDir,
+				ArgsUsage: "<type>",
+				Usage:     "migrate configuration file to a specific format",
+				Action:    actions.Migrate,
+				Category:  "config",
 			},
 		},
 	}

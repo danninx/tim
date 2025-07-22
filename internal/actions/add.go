@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
@@ -13,6 +14,10 @@ func Add(ctx context.Context, cmd *cli.Command) error {
 	plateType := cmd.StringArg("type")
 	plateName := cmd.StringArg("name")
 	plateOrigin := cmd.StringArg("origin")
+	if plateType == "" || plateName == "" || plateOrigin == "" {
+		cli.ShowSubcommandHelp(cmd)
+		os.Exit(1)
+	}
 
 	// check if plate already exists
 	config, err := conf.Load()

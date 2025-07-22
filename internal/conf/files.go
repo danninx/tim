@@ -14,17 +14,27 @@ func newConfigFile() (ConfigFile, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = mkDirIfNotExists(dir)
+	if err != nil {
+		return nil, err
+	}
+
 	dot := path.Join(dir, ".tim")
 	info, err := os.Stat(dot)
 
 	var filetype string
 	if !(err == nil && !info.IsDir()) { //
 		fmt.Printf("no configuration file was found, creating a 'tim.toml' in %s\n", dir)
+		err = touchFile(path.Join(dir, "tim.toml"))
+		if err != nil {
+			return nil, err
+		}
+
+		filetype = "toml"
 		err = SetConfFileType(DEFAULT_TYPE)
 		if err != nil {
 			return nil, err
 		}
-		filetype = DEFAULT_TYPE
 	} else {
 		file, err := os.OpenFile(dot, os.O_RDONLY|os.O_CREATE, 0777)
 		if err != nil {
@@ -60,4 +70,40 @@ func getTimDirectory() (string, error) {
 
 func validFiletypes() string {
 	return "legacy, toml"
+}
+
+func mkDirIfNotExists(path string) error {
+	file, err := os.Stat(path)
+	if err == nil {
+		if file.IsDir() {
+			return nil
+		}
+		return fmt.Errorf("tim directory exists as a file, but is not a directory")
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+
+	return os.Mkdir(path, 0740)
+}
+
+func touchFile(path string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		fmt.Printf("file %v exists", path)
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	fmt.Fprintln(file, "")
+	fmt.Printf("created file %v\n", path)
+	return nil
+
 }

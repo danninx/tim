@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
@@ -10,12 +11,17 @@ import (
 )
 
 func Remove(ctx context.Context, cmd *cli.Command) error {
+	name := cmd.StringArg("name")
+	if name == "" {
+		cli.ShowSubcommandHelp(cmd)
+		os.Exit(1)
+	}
+
 	config, err := conf.Load()
 	if err != nil {
 		return err
 	}
 
-	name := cmd.StringArg("name")
 	template, exists := config.Plates[name]
 
 	if !exists {

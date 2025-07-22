@@ -82,3 +82,10 @@ func SetConfFileType(t string) error {
 
 	return nil
 }
+
+func emptyConfig() TimConfig {
+	return TimConfig{
+		Options: TimOptions{},
+		Plates:  make(map[string]plate.UnloadedPlate),
+	}
+}

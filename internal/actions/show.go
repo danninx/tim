@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v3"
@@ -10,6 +11,11 @@ import (
 
 func Show(ctx context.Context, cmd *cli.Command) error {
 	name := cmd.StringArg("name")
+	if name == "" {
+		cli.ShowSubcommandHelp(cmd)
+		os.Exit(1)
+	}
+
 	template, err := GetPlate(name)
 	if err != nil {
 		return err

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"os"
 
 	"github.com/danninx/tim/internal/plate"
 	"github.com/urfave/cli/v3"
@@ -10,7 +11,10 @@ import (
 func Clone(ctx context.Context, cmd *cli.Command) error {
 	name := cmd.StringArg("name")
 	dest := cmd.StringArg("dest")
-
+	if name == "" || dest == "" {
+		cli.ShowSubcommandHelp(cmd)
+		os.Exit(1)
+	}
 	template, err := GetPlate(name)
 	if err != nil {
 		return err
