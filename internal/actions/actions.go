@@ -30,7 +30,7 @@ Generally helpful functions
 
 func CheckPathExists(p string) (string, error) {
 	clean := path.Clean(p)
-	var full string 
+	var full string
 	if strings.HasPrefix(clean, "/") {
 		full = clean
 	} else {
@@ -52,7 +52,7 @@ func CheckPathExists(p string) (string, error) {
 
 func ConfirmAction(msg string) (bool, error) {
 	fmt.Print(msg)
-	reader := bufio.NewReader(os.Stdin)	
+	reader := bufio.NewReader(os.Stdin)
 	response, err := reader.ReadString('\n')
 	if err != nil {
 		return false, err
@@ -61,18 +61,16 @@ func ConfirmAction(msg string) (bool, error) {
 	return response == "y" || response == "Y", nil
 }
 
-func GetPlate(name string) (plate.Plate, error) {
+func GetPlate(name string) (plate.UnloadedPlate, error) {
 	config, err := conf.Load()
-	if (err != nil) {
-		return plate.Plate{}, err
+	if err != nil {
+		return plate.UnloadedPlate{}, err
 	}
 
-	plate, exists := config.Plates[name]	
+	plate, exists := config.Plates[name]
 	if !exists {
-		return plate, &NO_PLATE_EXISTS{ Name: name }
+		return plate, &NO_PLATE_EXISTS{Name: name}
 	}
 
 	return plate, nil
 }
-
-

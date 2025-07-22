@@ -9,8 +9,8 @@ import (
 )
 
 type TimConfig struct {
-	Options TimOptions `toml:"options"`
-	Plates map [string] plate.Plate `toml:"plates"`
+	Options TimOptions                     `toml:"options"`
+	Plates  map[string]plate.UnloadedPlate `toml:"plates"`
 }
 
 type TimOptions struct {
@@ -23,7 +23,7 @@ type ConfigFile interface {
 }
 
 func Load() (TimConfig, error) {
-	file, err := newConfigFile()	
+	file, err := newConfigFile()
 	if err != nil {
 		return TimConfig{}, err
 	}
@@ -44,12 +44,10 @@ func SaveWithType(config TimConfig, t string) error {
 	var file ConfigFile
 
 	switch t {
-	case "legacy":
-		file = LegacyConfig{"tim.conf"}
 	case "toml":
 		file = TOMLConfig{"tim.toml"}
 	default:
-		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s\n", t, validFiletypes())
+		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s", t, validFiletypes())
 	}
 
 	err := file.Write(config)
@@ -67,19 +65,25 @@ func SetConfFileType(t string) error {
 	}
 
 	if !(t == "legacy" || t == "toml") {
-		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s\n", t, validFiletypes())
+		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s", t, validFiletypes())
 	}
 
 	full := path.Join(dir, ".tim")
-	file, err := os.OpenFile(full, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0777)
+	file, err := os.OpenFile(full, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
 	fmt.Fprintln(file, t)
-	file.Close()	
+	file.Close()
 
 	return nil
 }
 
+func emptyConfig() TimConfig {
+	return TimConfig{
+		Options: TimOptions{},
+		Plates:  make(map[string]plate.UnloadedPlate),
+	}
+}

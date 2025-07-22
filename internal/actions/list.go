@@ -10,15 +10,14 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-
 func List(ctx context.Context, cmd *cli.Command) error {
 	config, err := conf.Load()
 
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
-	var keys[] string
+	var keys []string
 	for k := range config.Plates {
 		keys = append(keys, k)
 	}
@@ -32,9 +31,9 @@ func List(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func printPlateLine(name string, p plate.Plate) {
+func printPlateLine(name string, p plate.UnloadedPlate) {
 	n := fmt.Sprintf("%v%-15s%v", ANSI_GREEN, name, ANSI_RESET)
-	i := fmt.Sprintf("%-s\n", p.Path)
+	i := fmt.Sprintf("%-s\n", p.Origin)
 	var t string
 	switch p.Type {
 	case "git":
@@ -44,6 +43,5 @@ func printPlateLine(name string, p plate.Plate) {
 	case "file":
 		t = fmt.Sprintf("%s%-8s%s", ANSI_MAGENTA, p.Type, ANSI_RESET)
 	}
-	fmt.Printf("\t- %-s%-s%-s", n, t, i)
+	fmt.Printf("- %-s%-s%-s", n, t, i)
 }
-

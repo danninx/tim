@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
@@ -10,36 +11,45 @@ import (
 )
 
 func Add(ctx context.Context, cmd *cli.Command) error {
-	name := cmd.StringArg("name")
+	plateType := cmd.StringArg("type")
+	plateName := cmd.StringArg("name")
+	plateOrigin := cmd.StringArg("origin")
+	if plateType == "" || plateName == "" || plateOrigin == "" {
+		cli.ShowSubcommandHelp(cmd)
+		os.Exit(1)
+	}
+
+	// check if plate already exists
 	config, err := conf.Load()
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
-	_, exists := config.Plates[name]
+	_, exists := config.Plates[plateName]
 	if exists {
-		msg := fmt.Sprintf("%vsource \"%v\" already exists, would you like to replace it? (y/N)%v", ANSI_YELLOW, name, ANSI_RESET)
+		msg := fmt.Sprintf("%vsource \"%v\" already exists, would you like to replace it? (y/N)%v", ANSI_YELLOW, plateName, ANSI_RESET)
 		confirm, err := ConfirmAction(msg)
-		if (err != nil) {
+		if err != nil {
 			return err
 		}
 		if !confirm {
-			fmt.Printf("skipping...")	
+			fmt.Printf("skipping...")
 			return nil
 		}
 	}
 
-	config.Plates[name] = plate.Plate {
-		Type: cmd.StringArg("type"),
-		Path: cmd.StringArg("path"),
-	}
-
-	err = conf.Save(config)
-	if (err != nil) {
+	newPlate, err := plate.NewPlate(plateType, plateName, plateOrigin)
+	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%vadded \"%v\" to templates!%v\n", ANSI_GREEN, name, ANSI_RESET)
+	config.Plates[plateName] = plate.Unload(newPlate)
+	err = conf.Save(config)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%vadded \"%v\" to templates!%v\n", ANSI_GREEN, plateName, ANSI_RESET)
 
 	return nil
 }
