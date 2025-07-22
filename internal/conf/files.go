@@ -34,7 +34,7 @@ func newConfigFile() (ConfigFile, error) {
 
 		scanner := bufio.NewScanner(file)
 		if !scanner.Scan() {
-			return nil, fmt.Errorf("no format detected, try using 'tim set-file [filetype]'. valid filetypes are:\n%s\n", validFiletypes())
+			return nil, fmt.Errorf("no format detected, try using 'tim set-file [filetype]'. valid filetypes are:\n%s", validFiletypes())
 		}
 		filetype = scanner.Text()
 	}
@@ -45,7 +45,7 @@ func newConfigFile() (ConfigFile, error) {
 	case "toml":
 		return TOMLConfig{"tim.toml"}, nil
 	default:
-		return nil, fmt.Errorf("an invalid filetype \"%s\" was found in %s, try using 'tim set-file [filetype]'. valid filetypes are: \n%s\n", filetype, dot, validFiletypes())
+		return nil, fmt.Errorf("an invalid filetype \"%s\" was found in %s, try using 'tim set-file [filetype]'. valid filetypes are: \n%s", filetype, dot, validFiletypes())
 	}
 }
 

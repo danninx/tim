@@ -28,7 +28,7 @@ func (legacy LegacyConfig) Read() (TimConfig, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	sources := map[string]plate.Plate{}
+	sources := map[string]plate.UnloadedPlate{}
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -42,7 +42,7 @@ func (legacy LegacyConfig) Read() (TimConfig, error) {
 			fmt.Printf("improperly formatted source was found:\n\t\"%v\"\n", line)
 			continue
 		}
-		s := plate.Plate{
+		s := plate.UnloadedPlate{
 			Type: split[0],
 			Path: split[1],
 		}
@@ -70,7 +70,9 @@ func (legacy LegacyConfig) Write(config TimConfig) error {
 	defer file.Close()
 
 	for k := range config.Plates {
-		val := plate.ToString(config.Plates[k])
+
+		template := config.Plates[k]
+		val := fmt.Sprintf("%v,%v", template.Type, template.Origin)
 		fmt.Fprintf(file, "%v=%v\n", k, val)
 	}
 

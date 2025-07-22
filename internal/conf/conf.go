@@ -49,7 +49,7 @@ func SaveWithType(config TimConfig, t string) error {
 	case "toml":
 		file = TOMLConfig{"tim.toml"}
 	default:
-		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s\n", t, validFiletypes())
+		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s", t, validFiletypes())
 	}
 
 	err := file.Write(config)
@@ -67,7 +67,7 @@ func SetConfFileType(t string) error {
 	}
 
 	if !(t == "legacy" || t == "toml") {
-		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s\n", t, validFiletypes())
+		return fmt.Errorf("invalid filetype \"%s\" provided. valid filetypes are: \n%s", t, validFiletypes())
 	}
 
 	full := path.Join(dir, ".tim")
