@@ -7,6 +7,7 @@ import (
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 	"github.com/urfave/cli/v3"
 )
 
@@ -38,7 +39,8 @@ func Add(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	newPlate, err := plate.NewPlate(plateType, plateName, plateOrigin)
+	sys := system.GetSystem()
+	newPlate, err := plate.NewPlate(plateType, plateName, plateOrigin, sys)
 	if err != nil {
 		return err
 	}

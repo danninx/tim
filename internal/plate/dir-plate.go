@@ -2,14 +2,16 @@ package plate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
+
+	"github.com/danninx/tim/internal/system"
 )
 
 type dirPlate struct {
-	name   string
-	origin string
-	path   string
+	name   	string
+	origin 	string
+	path   	string
+	sys 	system.System
 }
 
 func (plate *dirPlate) Name() string {
@@ -29,30 +31,30 @@ func (plate *dirPlate) Type() string {
 }
 
 func (plate *dirPlate) Sync() error {
-	err := os.RemoveAll(plate.path)
+	err := plate.sys.RemoveAll(plate.path)
 	if err != nil {
 		return err
 	}
-	return CopyDir(plate.origin, plate.path)
+	return plate.sys.CopyDir(plate.origin, plate.path)
 }
 
 func (plate *dirPlate) Copy(destination string) error {
-	return CopyDir(plate.path, destination)
+	return plate.sys.CopyDir(plate.path, destination)
 }
 
 func (plate *dirPlate) Delete() error {
-	return os.RemoveAll(plate.path)
+	return plate.sys.RemoveAll(plate.path)
 }
 
-func newDirPlate(name string, origin string) (Plate, error) {
+func newDirPlate(name string, origin string, sys system.System) (Plate, error) {
 	fmt.Println("saving a copy of the directory to tim directory...")
-	timDir, err := TimDirectory()
+	timDir, err := sys.TimDirectory()
 	if err != nil {
 		return nil, err
 	}
 
 	clonePath := filepath.Join(timDir, "dir", name)
-	err = CopyDir(origin, clonePath)
+	err = sys.CopyDir(origin, clonePath)
 	if err != nil {
 		return nil, err
 	}
@@ -62,5 +64,6 @@ func newDirPlate(name string, origin string) (Plate, error) {
 		name:   name,
 		origin: origin,
 		path:   clonePath,
+		sys:	sys,
 	}, nil
 }

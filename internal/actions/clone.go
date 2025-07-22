@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 	"github.com/urfave/cli/v3"
 )
 
@@ -20,7 +21,7 @@ func Clone(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	source, err := plate.Load(name, template)
+	source, err := plate.Load(name, template, system.GetSystem())
 	if err != nil {
 		return err
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,7 +41,7 @@ func Remove(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	source, err := plate.Load(name, template)
+	source, err := plate.Load(name, template, system.GetSystem())
 	if err != nil {
 		return err
 	}

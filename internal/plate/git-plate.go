@@ -2,14 +2,16 @@ package plate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
+
+	"github.com/danninx/tim/internal/system"
 )
 
 type gitPlate struct {
-	name   string
-	origin string
-	path   string
+	name   	string
+	origin 	string
+	path   	string
+	sys		system.System
 }
 
 func (plate *gitPlate) Name() string {
@@ -29,12 +31,12 @@ func (plate *gitPlate) Type() string {
 }
 
 func (plate *gitPlate) Sync() error {
-	err := os.RemoveAll(plate.path)
+	err := plate.sys.RemoveAll(plate.path)
 	if err != nil {
 		return err
 	}
 
-	err = GitClone(plate.origin, plate.path)
+	err = plate.sys.GitClone(plate.origin, plate.path)
 	if err != nil {
 		return err
 	}
@@ -44,21 +46,21 @@ func (plate *gitPlate) Sync() error {
 }
 
 func (plate *gitPlate) Copy(destination string) error {
-	return CopyDir(plate.path, destination)
+	return plate.sys.CopyDir(plate.path, destination)
 }
 
 func (plate *gitPlate) Delete() error {
-	return os.RemoveAll(plate.path)
+	return plate.sys.RemoveAll(plate.path)
 }
 
-func newGitPlate(name string, origin string) (Plate, error) {
+func newGitPlate(name string, origin string, sys system.System) (Plate, error) {
 	fmt.Println("cloning repository for offline use...")
-	timDir, err := TimDirectory()
+	timDir, err := sys.TimDirectory()
 	if err != nil {
 		return nil, err
 	}
 	clonePath := filepath.Join(timDir, "git", name)
-	err = GitClone(origin, clonePath)
+	err = sys.GitClone(origin, clonePath)
 	if err != nil {
 		return nil, err
 	}
@@ -67,5 +69,6 @@ func newGitPlate(name string, origin string) (Plate, error) {
 		name:   name,
 		origin: origin,
 		path:   clonePath,
+		sys:	sys,
 	}, nil
 }

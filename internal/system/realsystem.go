@@ -1,4 +1,4 @@
-package plate
+package system
 
 import (
 	"fmt"
@@ -6,19 +6,13 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 )
 
-func GitClone(src string, dest string) error {
-	fmt.Printf("using git to copy source \"%v\"\n", src)
-	cmd := exec.Command("git", "clone", src, dest)
-	cmd.Stdout = nil // make git silent unless error
-	cmd.Stderr = os.Stderr
-	fmt.Println(cmd)
-	return cmd.Run()
-}
+type RealSystem struct{}
 
-func CopyDir(src string, dest string) error {
+func (_ RealSystem) CopyDir(src string, dest string) error {
 	fsys := os.DirFS(src)
 	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -60,7 +54,7 @@ func CopyDir(src string, dest string) error {
 	})
 }
 
-func CopyFile(src string, dest string) error {
+func (_ RealSystem) CopyFile(src string, dest string) error {
 	srcFile, err := os.OpenFile(src, os.O_RDONLY, 0777)
 	if err != nil {
 		return err
@@ -101,4 +95,26 @@ func CopyFile(src string, dest string) error {
 	}
 
 	return os.Chmod(destFilePath, info.Mode())
+}
+
+func (_ RealSystem) GitClone(src string, dest string) error {
+	fmt.Printf("using git to copy source \"%v\"\n", src)
+	cmd := exec.Command("git", "clone", src, dest)
+	cmd.Stdout = nil // make git silent unless error
+	cmd.Stderr = os.Stderr
+	fmt.Println(cmd)
+	return cmd.Run()
+}
+
+func (_ RealSystem) RemoveAll(path string) error {
+	return os.RemoveAll(path)
+}
+
+func (_ RealSystem) TimDirectory() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(home, ".config/tim"), nil
 }
