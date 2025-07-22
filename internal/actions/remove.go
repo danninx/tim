@@ -34,8 +34,11 @@ func Remove(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	template, err = plate.Load(name, template)
-	template.Delete()
+	source, err := plate.Load(name, template)
+	if err != nil {
+		return err
+	}
+	source.Delete()
 	delete(config.Plates, name)
 
 	conf.Save(config)
