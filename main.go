@@ -28,7 +28,7 @@ func main() {
 				},
 				Usage:    "create files using a plate",
 				Action:   actions.Clone,
-				Category: "managemenet",
+				Category: "management",
 			},
 
 			// MANAGE
