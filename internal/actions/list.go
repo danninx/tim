@@ -44,6 +44,6 @@ func printPlateLine(name string, p plate.Plate) {
 	case "file":
 		t = fmt.Sprintf("%s%-8s%s", ANSI_MAGENTA, p.Type, ANSI_RESET)
 	}
-	fmt.Printf("\t- %-s%-s%-s", n, t, i)
+	fmt.Printf("- %-s%-s%-s", n, t, i)
 }
 

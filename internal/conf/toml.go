@@ -48,7 +48,7 @@ func (file TOMLConfig) Write(config TimConfig) error {
 	fmt.Println(string(b))
 
 	full := path.Join(dir, file.path)
-	err = os.WriteFile(full, b, 0777)
+	err = os.WriteFile(full, b, 0644)
 	if err != nil {
 		return err
 	}

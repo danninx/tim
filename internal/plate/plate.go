@@ -4,60 +4,32 @@ import (
 	"fmt"
 )
 
-type PlateData struct {
-	Type 		string
-	Origin		string
-	LocalPath 	string
-}
-
 type Plate interface {
-	CopyTo(string) 	error
-	LocalPath() 	string
-	ToString() 		string
+	Name()						(string)
+	Origin() 					(string)
+	Path()						(string)
+	Type() 						(string)
+	Sync(destination string)	(error)
 }
 
-func ToString(plate PlateData) string {
-	return fmt.Sprintf("%v,%v", plate.Type, plate.Origin)
+type OldPlate struct {
+	Type 	string
+	Origin	string
+	Path 	string
 }
 
-/*
-	Git plate type
-*/
-
-type GitPlate struct {
-	Data PlateData
+func ToString(plate Plate) string {
+	return fmt.Sprintf("%v,%v", plate.Type(), plate.Origin())
 }
 
-func (plate GitPlate) CopyTo(dir string) error {
-
-	return nil
-}
-
-func (plate GitPlate) ToString() string {
-	return ToString(plate.Data)
-}
-
-/*
-	Dir plate type
-*/
-
-type DirPlate struct {
-	Data PlateData
-}
-
-func (plate DirPlate) ToString() string {
-	return ToString(plate.Data)
-}
-
-/*
-	File plate type
-*/
-
-type FilePlate struct {
-	Data PlateData
-}
-
-
-func (plate FilePlate) ToString() string {
-	return ToString(plate.Data)
+func NewPlate(plateType string, name string, origin string, path string) (error, Plate) {
+	switch plateType {
+	case "dir":
+		return newDirPlate(name, origin, path)
+	case "file":
+		return newFilePlate(name, origin, path)
+	case "git":
+		return newGitPlate(name, origin, path)
+	}
+	return fmt.Errorf("An invalid plate type was provided"), nil
 }
