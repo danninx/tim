@@ -44,8 +44,6 @@ func SaveWithType(config TimConfig, t string) error {
 	var file ConfigFile
 
 	switch t {
-	case "legacy":
-		file = LegacyConfig{"tim.conf"}
 	case "toml":
 		file = TOMLConfig{"tim.toml"}
 	default:

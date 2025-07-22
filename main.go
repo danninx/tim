@@ -87,20 +87,6 @@ func main() {
 				Action:    actions.Show,
 				Category:  "info",
 			},
-
-			// CONFIG
-			{
-				Name: "migrate",
-				Arguments: []cli.Argument{
-					&cli.StringArg{
-						Name: "type",
-					},
-				},
-				ArgsUsage: "<type>",
-				Usage:     "migrate configuration file to a specific format",
-				Action:    actions.Migrate,
-				Category:  "config",
-			},
 		},
 	}
 

@@ -50,8 +50,6 @@ func newConfigFile() (ConfigFile, error) {
 	}
 
 	switch filetype {
-	case "legacy":
-		return LegacyConfig{"tim.conf"}, nil
 	case "toml":
 		return TOMLConfig{"tim.toml"}, nil
 	default:
@@ -69,7 +67,7 @@ func getTimDirectory() (string, error) {
 }
 
 func validFiletypes() string {
-	return "legacy, toml"
+	return "toml"
 }
 
 func mkDirIfNotExists(path string) error {
