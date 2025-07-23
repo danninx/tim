@@ -22,10 +22,6 @@ type Plate interface {
 	Delete() error
 }
 
-func ToString(plate Plate) string {
-	return fmt.Sprintf("%v,%v", plate.Type(), plate.Origin())
-}
-
 func NewPlate(plateType string, name string, origin string, sys system.System) (Plate, error) {
 	switch plateType {
 	case "dir":

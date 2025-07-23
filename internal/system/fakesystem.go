@@ -19,5 +19,5 @@ func (_ FakeSystem) RemoveAll(path string) error {
 }
 
 func (_ FakeSystem) TimDirectory() (string, error) {
-	return "fake-tim", nil
+	return "timTest", nil
 }
