@@ -9,6 +9,7 @@ import (
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 )
 
 /*
@@ -62,7 +63,9 @@ func ConfirmAction(msg string) (bool, error) {
 }
 
 func GetPlate(name string) (plate.UnloadedPlate, error) {
-	config, err := conf.Load()
+	sys := system.GetSystem()
+
+	config, err := conf.Load(sys)
 	if err != nil {
 		return plate.UnloadedPlate{}, err
 	}

@@ -106,8 +106,20 @@ func (_ RealSystem) GitClone(src string, dest string) error {
 	return cmd.Run()
 }
 
+func (_ RealSystem) OpenFile(path string, flag int, perm os.FileMode) (*os.File, error) {
+	return os.OpenFile(path, flag, perm)
+}
+
+func (_ RealSystem) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
+}
+
 func (_ RealSystem) RemoveAll(path string) error {
 	return os.RemoveAll(path)
+}
+
+func (_ RealSystem) Stat(path string) (os.FileInfo, error) {
+	return os.Stat(path)
 }
 
 func (_ RealSystem) TimDirectory() (string, error) {
@@ -117,4 +129,44 @@ func (_ RealSystem) TimDirectory() (string, error) {
 	}
 
 	return path.Join(home, ".config/tim"), nil
+}
+
+
+func (_ RealSystem) TouchDir(path string) error {
+	file, err := os.Stat(path)
+	if err == nil {
+		if file.IsDir() {
+			return nil
+		}
+		return fmt.Errorf("tim directory exists as a file, but is not a directory")
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+
+	return os.Mkdir(path, 0740)
+}
+
+func (_ RealSystem) TouchFile(path string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		// file already exists, skip
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	fmt.Fprintln(file, "")
+	fmt.Printf("created file %v\n", path)
+	return nil
+}
+
+func (_ RealSystem) WriteFile(path string, data []byte, perm os.FileMode) error {
+	return os.WriteFile(path, data, perm)
 }

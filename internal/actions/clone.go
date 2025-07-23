@@ -10,6 +10,8 @@ import (
 )
 
 func Clone(ctx context.Context, cmd *cli.Command) error {
+	sys := system.GetSystem()
+
 	name := cmd.StringArg("name")
 	dest := cmd.StringArg("dest")
 
@@ -27,7 +29,7 @@ func Clone(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	source, err := plate.Load(name, template, system.GetSystem())
+	source, err := plate.Load(name, template, sys)
 	if err != nil {
 		return err
 	}
