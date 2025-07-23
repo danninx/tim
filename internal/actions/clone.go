@@ -12,10 +12,16 @@ import (
 func Clone(ctx context.Context, cmd *cli.Command) error {
 	name := cmd.StringArg("name")
 	dest := cmd.StringArg("dest")
-	if name == "" || dest == "" {
+
+	if name == "" {
 		cli.ShowSubcommandHelp(cmd)
 		os.Exit(1)
 	}
+
+	if dest == "" {
+		dest = "."
+	}
+
 	template, err := GetPlate(name)
 	if err != nil {
 		return err
