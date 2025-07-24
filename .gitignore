@@ -27,4 +27,7 @@ go.work.sum
 # build results
 result
 test
-tim
+
+# direnv
+.envrc
+.direnv

@@ -1,10 +1,10 @@
 package conf
 
 import (
-	"os"
 	"path"
 
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -12,15 +12,15 @@ type TOMLConfig struct {
 	path string
 }
 
-func (file TOMLConfig) Read() (TimConfig, error) {
-	dir, err := getTimDirectory()
+func (file TOMLConfig) Read(sys system.System) (TimConfig, error) {
+	dir, err := system.GetSystem().TimDirectory()
 	if err != nil {
 		return emptyConfig(), err
 	}
 
 	full := path.Join(dir, file.path)
 
-	b, err := os.ReadFile(full)
+	b, err := sys.ReadFile(full)
 	if err != nil {
 		return emptyConfig(), err
 	}
@@ -37,8 +37,8 @@ func (file TOMLConfig) Read() (TimConfig, error) {
 	return config, nil
 }
 
-func (file TOMLConfig) Write(config TimConfig) error {
-	dir, err := getTimDirectory()
+func (file TOMLConfig) Write(config TimConfig, sys system.System) error {
+	dir, err := sys.TimDirectory()
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (file TOMLConfig) Write(config TimConfig) error {
 	}
 
 	full := path.Join(dir, file.path)
-	err = os.WriteFile(full, b, 0644)
+	err = sys.WriteFile(full, b, 0644)
 	if err != nil {
 		return err
 	}

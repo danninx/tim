@@ -7,11 +7,14 @@ import (
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 	"github.com/urfave/cli/v3"
 )
 
 func List(ctx context.Context, cmd *cli.Command) error {
-	config, err := conf.Load()
+	sys := system.GetSystem()
+
+	config, err := conf.Load(sys)
 
 	if err != nil {
 		return err

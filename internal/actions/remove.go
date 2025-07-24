@@ -7,17 +7,21 @@ import (
 
 	"github.com/danninx/tim/internal/conf"
 	"github.com/danninx/tim/internal/plate"
+	"github.com/danninx/tim/internal/system"
 	"github.com/urfave/cli/v3"
 )
 
 func Remove(ctx context.Context, cmd *cli.Command) error {
+	sys := system.GetSystem()
+
 	name := cmd.StringArg("name")
+
 	if name == "" {
 		cli.ShowSubcommandHelp(cmd)
 		os.Exit(1)
 	}
 
-	config, err := conf.Load()
+	config, err := conf.Load(sys)
 	if err != nil {
 		return err
 	}
@@ -40,14 +44,14 @@ func Remove(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	source, err := plate.Load(name, template)
+	source, err := plate.Load(name, template, sys)
 	if err != nil {
 		return err
 	}
 	source.Delete()
 	delete(config.Plates, name)
 
-	conf.Save(config)
+	conf.Save(config, sys)
 
 	return nil
 }

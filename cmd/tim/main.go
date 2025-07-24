@@ -65,6 +65,22 @@ func main() {
 				Action:    actions.Remove,
 				Category:  "management",
 			},
+			{
+				Name: "rename",
+				Aliases: []string{"re"},
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name: "name",
+					},
+					&cli.StringArg{
+						Name: "newName",
+					},
+				},
+				ArgsUsage: "<old-name> <new-name>",
+				Usage: "rename a plate from your templates",
+				Action: actions.Rename,
+				Category: "management",
+			},
 
 			// INFO
 			{
