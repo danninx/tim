@@ -54,6 +54,8 @@ func newDirPlate(name string, origin string, sys system.System) (Plate, error) {
 	}
 
 	clonePath := filepath.Join(timDir, "dir", name)
+	sys.TouchDir(filepath.Join(timDir, "dir"))
+
 	err = sys.CopyDir(origin, clonePath)
 	if err != nil {
 		return nil, err

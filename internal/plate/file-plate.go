@@ -2,7 +2,6 @@ package plate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/danninx/tim/internal/system"
@@ -32,7 +31,7 @@ func (plate *filePlate) Type() string {
 }
 
 func (plate *filePlate) Sync() error {
-	os.RemoveAll(plate.path)
+	plate.sys.RemoveAll(plate.path)
 	return plate.sys.CopyFile(plate.origin, plate.path)
 }
 
@@ -52,12 +51,13 @@ func newFilePlate(name string, origin string, sys system.System) (Plate, error) 
 	}
 
 	clonePath := filepath.Join(timDir, "files", name)
+	sys.TouchDir(filepath.Join(timDir, "files"))
+
 	err = sys.CopyFile(origin, clonePath)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("copy saved to %v\n", clonePath)
 	return &filePlate{
 		name:   name,
 		origin: origin,

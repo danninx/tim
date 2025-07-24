@@ -59,7 +59,10 @@ func newGitPlate(name string, origin string, sys system.System) (Plate, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	clonePath := filepath.Join(timDir, "git", name)
+	sys.TouchDir(filepath.Join(timDir, "git"))
+
 	err = sys.GitClone(origin, clonePath)
 	if err != nil {
 		return nil, err
