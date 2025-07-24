@@ -118,6 +118,10 @@ func (_ RealSystem) RemoveAll(path string) error {
 	return os.RemoveAll(path)
 }
 
+func (_ RealSystem) Rename(path string, newpath string) error {
+	return os.Rename(path, newpath)
+}
+
 func (_ RealSystem) Stat(path string) (os.FileInfo, error) {
 	return os.Stat(path)
 }

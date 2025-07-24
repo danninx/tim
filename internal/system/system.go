@@ -12,6 +12,7 @@ type System interface {
 	OpenFile(path string, flag int, perm os.FileMode) (*os.File, error)
 	ReadFile(path string) ([]byte, error)
 	RemoveAll(path string) error
+	Rename(path string, newpath string) error
 	TimDirectory() (string, error)
 	TouchDir(path string) error
 	TouchFile(path string) error

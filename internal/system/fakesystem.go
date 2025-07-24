@@ -28,6 +28,10 @@ func (_ FakeSystem) RemoveAll(path string) error {
 	return nil
 }
 
+func (_ FakeSystem) Rename(path string, newpath string) error {
+	return nil
+}
+
 func (_ FakeSystem) Stat(path string) (os.FileInfo, error) {
 	return nil, nil
 }

@@ -20,6 +20,7 @@ type Plate interface {
 	Sync() error
 	Copy(destination string) error
 	Delete() error
+	Rename(newName string) error
 }
 
 func NewPlate(plateType string, name string, origin string, sys system.System) (Plate, error) {

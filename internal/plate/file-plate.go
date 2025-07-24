@@ -2,6 +2,7 @@ package plate
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 
 	"github.com/danninx/tim/internal/system"
@@ -41,6 +42,15 @@ func (plate *filePlate) Copy(destination string) error {
 
 func (plate *filePlate) Delete() error {
 	return plate.sys.RemoveAll(plate.path)
+}
+
+func (plate *filePlate) Rename(newName string) error {
+	newpath := filepath.Join(path.Dir(plate.path), newName)
+	if err := plate.sys.Rename(plate.path, newpath); err != nil {
+		return err
+	}
+	plate.path = newpath
+	return nil
 }
 
 func newFilePlate(name string, origin string, sys system.System) (Plate, error) {
