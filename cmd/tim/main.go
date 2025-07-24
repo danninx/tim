@@ -13,6 +13,7 @@ func main() {
 	cmd := &cli.Command{
 		Name:  "tim",
 		Usage: "manage your template files locally",
+		Version: "0.3.0",
 		Commands: []*cli.Command{
 			// TEMPLATE
 			{

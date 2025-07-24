@@ -26,14 +26,8 @@
       pname = "tim";
       version = "0.3.0";
 
-      src = pkgs.fetchFromGitHub {
-        owner = "danninx";
-        repo = "tim";
-        rev = "fd183ede4038b82822c611e9d8687124d95424ed";
-        hash = "sha256-IjgDz7wBzDLK7ae0HNfrOOUuup3xTA4LA1GAFx4eGOs=";
-      };
-
-      vendorHash = "sha256-GkwY1Y8n7vOJ2VFMjZP3Aew65HIPxQ/hb2eY2wq7rmE=";
+      src = ./.;
+      vendorHash = null;
 
       meta = {
         description = "templating script for common sources";
