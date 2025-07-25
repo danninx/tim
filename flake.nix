@@ -30,14 +30,18 @@
       vendorHash = null;
 
       meta = {
-        description = "templating script for common sources";
+        description = "template management tool";
         license = pkgs.lib.licenses.mit;
         homepage = "https://github.com/danninx/tim";
       };
     };
 
-    overlays.default = (final: prev: {
-      tim = self.packages.${system}.default;
-    });
+    nixosModules.default = { config, lib, ... }: {
+      options.programs.tim.enable = lib.mkEnableOption "install tim template management tool";
+
+      config = lib.mkIf config.programs.tim.enable {
+        environment.systemPackages = [ self.packages.${system}.default ];
+      };
+    };
   });
 }
