@@ -35,13 +35,13 @@
         homepage = "https://github.com/danninx/tim";
       };
     };
-
-    nixosModules.default = { config, lib, ... }: {
+  }) // {
+    nixosModules.default = { config, lib, pkgs, ... }: {
       options.programs.tim.enable = lib.mkEnableOption "install tim template management tool";
 
       config = lib.mkIf config.programs.tim.enable {
-        environment.systemPackages = [ self.packages.${system}.default ];
+        environment.systemPackages = [ self.packages.${pkgs.system}.default ];
       };
     };
-  });
+  };
 }
