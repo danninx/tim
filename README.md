@@ -37,31 +37,29 @@ go install github.com/danninx/tim@latest
 If you need to build from source, you will need `go` version 1.24+. After that, clone the repository and run `go build` and then copy the binary to your path, adding any permissions necessary.
 
 ### Nix Configuration 
-You can use this overlay in order to add `tim` to your packages:
+If you use flakes for your system configuration, you can include `tim` as a flake input. Just add this to your `flake.nix`:
 
+```nix
+inputs.tim.url = "github:danninx/tim";
 ```
-self: super: {
-  tim = super.callPackage (super.buildGo124Module {
-    pname = "tim";
-    version = "0.2.0";
 
-    src = super.fetchFromGitHub {
-      owner = "danninx";
-      repo = "tim";
-      rev = "fd183ede4038b82822c611e9d8687124d95424ed";
-      hash = "sha256-IjgDz7wBzDLK7ae0HNfrOOUuup3xTA4LA1GAFx4eGOs=";
-    };
+And make sure to include it in your `modules` section of your `nixosConfiguration`s:
 
-    vendorHash = "sha256-GkwY1Y8n7vOJ2VFMjZP3Aew65HIPxQ/hb2eY2wq7rmE=";
-
-    meta = {
-        description = "templating script for common sources";
-        license = super.lib.licenses.mit;
-        homepage = "https://github.com/danninx/tim";
-    };
-  }) {};
-}
+```nix
+nixosConfigurations.joes-desktop = nixpkgs.lib.nixosSystem {
+    modules = [ 
+        ./configuration.nix 
+        inputs.tim.nixosModules.default
+    ];
+};
 ```
+
+Then you can enable it by either putting it in your `environment.systemPackages`, or use the following:
+
+```nix
+programs.tim.enable = true;
+```
+
 
 ## To-Do
 
