@@ -35,5 +35,9 @@
         homepage = "https://github.com/danninx/tim";
       };
     };
+
+    overlays.default = (final: prev: {
+      tim = self.packages.${system}.default;
+    });
   });
 }
